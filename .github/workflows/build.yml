@@ -6,6 +6,10 @@ on:
       - 'entries/**'
   workflow_dispatch:
 
+concurrency:
+  group: build-humans-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -15,6 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
           persist-credentials: true
 
       - uses: actions/setup-python@v5
@@ -34,4 +40,5 @@ jobs:
             exit 0
           fi
           git commit -m "auto-update humans.json"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin HEAD:${GITHUB_REF_NAME}
